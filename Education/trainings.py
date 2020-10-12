@@ -473,6 +473,7 @@ There are three types of methods
 #         mname="F.",
 #         lname="Kennedy")
 '''Decorator'''
+
 # def decorator_function(func):
 #     def wrapper():
 #         print('Функция-обёртка!')
@@ -641,14 +642,87 @@ There are three types of methods
 # lst = [5, 15, 20, 8]
 # print(next(lst))
 
+#
+# thisdict = {
+#   "brand": "Ford",
+#   "model": "Mustang",
+#   "year": 1964
+# }
+# for x in thisdict.values():
+#     print(x)
+#
+# for x, y in thisdict.items():
+#     print(x, y)
 
-thisdict = {
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
-}
-for x in thisdict.values():
-    print(x)
 
-for x, y in thisdict.items():
-    print(x, y)
+# import re
+# s = '-37%'
+# print([int(s) for s in re.findall(r'-\b\d+\b', s)])
+#
+# test_str = "GeeksforGeeks"
+#
+# # using naive method to get count
+# # of each element in string
+# all_freq = {}
+#
+# for i in test_str:
+#     if i in all_freq:
+#         all_freq[i] += 1
+#     else:
+#         all_freq[i] = 1
+# # printing result
+# print("Count of all characters in GeeksforGeeks is :\n "
+#       + str(all_freq))
+
+
+# class A:
+#     def __init__(self, a=1):
+#         self.a = a
+#
+#
+# a = A()
+# del a
+# a.__del__
+
+
+d = {'a': 0, 'b': [1, 2]}
+print(d['b'])
+
+
+# print(d.__iter__())
+# p = d.__iter__()
+# print(d[p.__next__()])
+# print(d[p.__next__()])
+# print(d)
+# print(d.values())
+# print(d.keys())
+# print(d.items())
+# print(d.pop('b'))
+# print(d)
+
+
+# print('\"igor\'s\"')
+# a = [i for i in range(1)]
+# print(a)
+# print(int(a[0]))
+
+# def fib(a):
+#     if a == 0:
+#         return 0
+#     elif a == 1:
+#         return 1
+#     else:
+#         return fib(a) + fib(a - 1)
+#
+# print(fib(2))
+
+
+def fact(a):
+    return 1 if a < 2 else a * fact(a - 1)
+
+
+print(fact(3))
+
+a = 50
+sq = lambda a: a * a
+print(sq(a))
