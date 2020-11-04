@@ -11,25 +11,20 @@ import json
 
 class Shoe:
 
-    kind = ''
-    link = ''
-    size_list = []
-    def __init__(self, name, curr_price, discount):
+    def __init__(self, name, curr_price, discount, shoe_type, size_list, link):
         self.name = name
-        # self.full_price = full_price
         self.curr_price = curr_price
         self.discount = discount
-        #self.sizes = size_list
-        # self.link = link
-        # self.type = kind
+        self.shoe_type = shoe_type
+        self.sizes = size_list
+        self.link = link
 
-    def add_all(self, k, l, s_list):
-        self.sizes = s_list
-        self.link = l
-        self.type = k
+    def add_all(self):
+        pass
 
 
-full_url = 'https://www.asos.com/men/outlet/shoes-trainers/cat/?cid=27437&currentpricerange=0-210&nlid=mw|outlet|shop%20by%20product&refine=brand:'
+full_url = 'https://www.asos.com/men/outlet/shoes-trainers/cat/?cid=27437' \
+           '&currentpricerange=0-210&nlid=mw|outlet|shop%20by%20product&refine=brand:'
 
 sizes = {3.5: 2336,
          4: 2340,
@@ -89,7 +84,8 @@ inv_types = {
 url_for_adidas = full_url + brands['Adidas'] + '&page=1'
 
 headers = {
-    "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
+    "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                  ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
 
 # driver = webdriver.Chrome()
 driver = webdriver.Chrome(ChromeDriverManager().install())
@@ -98,69 +94,84 @@ driver.implicitly_wait(10)  # seconds
 driver.get(url_for_adidas)
 time.sleep(2)
 page = driver.find_element_by_xpath('//*[@id="plp"]/div/div/div[2]/div/div[1]/section').text
-arr = page.split('\n')
+data_from_page = page.split('\n')
 
-names = tuple(arr[::3])
-# print([int(s) for s in re.findall(r'-\b\d+\b', s)])
-info = (arr[1::3], arr[2::3])
-# print(info[0][:])
-print(arr[1].split(' '))
+names = tuple(data_from_page[::3])
+info = (data_from_page[1::3], data_from_page[2::3])
 adidas_trainers = []
-for i in range(len(names)):
-    # Same 2 lines, but shorter
-    # adidas_trainers.append(Shoe(names[i], info[0][i], [int(info[1][i]) for info[1][i] in re.findall(r'\b\d+\b', info[1][i])]))
-    adidas_trainers.append(Shoe(names[i], info[0][i], int(re.search(r'\b\d+\b', info[1][i])[0])))
-    # shoes.append(Shoe(names[i], info[0][i], info[1][i]))
-
-print(adidas_trainers[0].name)
 counter = 0
-print(len(adidas_trainers))
-for el in adidas_trainers:
-    counter += 1
-    if counter == 10:
-        break
-    # print(counter)
-    try:
-        driver.find_element_by_xpath('//*[contains(text(), \"{}\")]'.format(el.name)).click()
-        time.sleep(1)
-        # driver.refresh()
-        element_present = EC.presence_of_element_located((By.XPATH, '//*[@id="chrome-footer"]/footer/div[1]/div[1]'))
-        WebDriverWait(driver, 5).until(element_present)
-        sz = driver.find_element_by_xpath('//*[@id="main-size-select-0"]').text
-        arr = sz.split('\n')
-        arr2 = []
-        for s in arr:
-            # if re.match('[0-9]$', el):
-            if re.search('EU.[+-]?([0-9]*[.])?[0-9]+$', s, flags=re.IGNORECASE):
-                arr2.append(s)
+for i in range(len(names)):
+    if i % 2 == 0:
+        try:
+            driver.find_element_by_xpath('//*[contains(text(), \"{}\")]'.format(names[i])).click()
+            time.sleep(1)
+            driver.refresh()
+            sz = driver.find_element_by_xpath('//*[@id="main-size-select-0"]').text
+            data_from_page = sz.split('\n')
+            shoe_sizes = []
+            for s in data_from_page:
+                if re.search('EU.[+-]?([0-9]*[.])?[0-9]+$', s, flags=re.IGNORECASE):
+                    shoe_sizes.append(s)
+            adidas_trainers.append(Shoe(name=names[i],
+                                        curr_price=info[0][i],
+                                        discount=int(re.search(r'\b\d+\b', info[1][i])[0]),
+                                        shoe_type=inv_types[8606],
+                                        size_list=shoe_sizes,
+                                        link=driver.current_url))
+            driver.back()
+            print(adidas_trainers[counter].__dict__)
+        except selenium.common.exceptions.NoSuchElementException:
+            # driver.refresh()
+            driver.get(url_for_adidas)
+            continue
+        except selenium.common.exceptions.ElementClickInterceptedException:
+            driver.get(url_for_adidas)
+            continue
+        except selenium.common.exceptions.StaleElementReferenceException:
+            driver.get(url_for_adidas)
+            continue
+        counter += 1
+        if counter == 5:
+            break
 
-        el.add_all(inv_types[8606], driver.current_url, arr2)
-        # el.sizes = arr2
-        # el.link = driver.current_url
-        # el.kind = inv_types[8606]
-        driver.back()
-        print(el.__dict__)
-    except selenium.common.exceptions.NoSuchElementException:
-        # driver.refresh()
-        driver.get(url_for_adidas)
-        continue
-    except selenium.common.exceptions.ElementClickInterceptedException:
-        driver.get(url_for_adidas)
-        continue
-
-
-# driver.find_element_by_xpath('//*[contains(text(), \"{}\")]'.format(adidas_trainers[0].name)).click()
+driver.quit()
 for shoe in adidas_trainers:
     print(shoe.__dict__)
+
+
+def obj_dict(obj):
+    return obj.__dict__
+
+
+json_string = json.dumps(adidas_trainers, default=obj_dict)
+
+with open('shoes.json', 'w') as outfile:
+    json.dump(json_string, outfile)
+
+# Same 2 lines, but shorter
+# adidas_trainers.append(Shoe(names[i], info[0][i], [int(info[1][i]) for info[1][i]
+# in re.findall(r'\b\d+\b', info[1][i])]))
+# shoes.append(Shoe(names[i], info[0][i], info[1][i]))
+
+
+# element_present = EC.presence_of_element_located(
+#     (By.XPATH, '//*[@id="chrome-footer"]/footer/div[1]/div[1]'))
+# WebDriverWait(driver, 5).until(element_present)
+
+
+# if re.match('[0-9]$', el):
+
+
+# b = [a.name for a in adidas_trainers if a.discount == 33]
+# for a in b:
+#     print(a.__dict__)
 
 # with open('shoes.txt', 'w') as outfile:
 #     outfile.write(adidas_trainers[:])
 #
 # print(name)
 
-b = [a.name for a in adidas_trainers if a.discount == 33]
-for a in b:
-    print(a.__dict__)
+
 # try:
 #     name = driver.find_element_by_xpath('/html/body/main/div[1]/section[1]/div/div[2]/div[2]/div[1]/h1').text
 # except selenium.common.exceptions.StaleElementReferenceException:
@@ -169,12 +180,11 @@ for a in b:
 #     name = driver.find_element_by_xpath('//*[@id="aside-content"]/div[1]/h1').text
 
 
-
-# element_present = EC.presence_of_element_located((By.XPATH, '//*[@id="chrome-footer"]/footer/div[1]/div[1]'))
+# element_present = EC.presence_of_element_located
+# ((By.XPATH, '//*[@id="chrome-footer"]/footer/div[1]/div[1]'))
 # WebDriverWait(driver, 5).until(element_present)
 # time.sleep(2)
 # page = driver.find_element_by_xpath('//*[@id="plp"]/div/div/div[2]/div/div[1]/section').text
 # print(type(page))
 # print(page)
 # arr = page.split('\n')
-driver.quit()
