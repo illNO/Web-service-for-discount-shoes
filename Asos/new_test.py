@@ -99,7 +99,6 @@ data_from_page = page.split('\n')
 names = tuple(data_from_page[::3])
 info = (data_from_page[1::3], data_from_page[2::3])
 adidas_trainers = []
-counter = 0
 for i in range(len(names)):
     if i % 2 == 0:
         try:
@@ -130,9 +129,7 @@ for i in range(len(names)):
         except selenium.common.exceptions.StaleElementReferenceException:
             driver.get(url_for_adidas)
             continue
-        counter += 1
-        if counter == 5:
-            break
+
 
 driver.quit()
 for shoe in adidas_trainers:
@@ -146,6 +143,9 @@ def obj_dict(obj):
 json_string = json.dumps(adidas_trainers, default=obj_dict)
 
 with open('shoes.json', 'w') as outfile:
+    json.dump(json_string, outfile)
+
+with open('shoes.txt', 'w') as outfile:
     json.dump(json_string, outfile)
 
 # Same 2 lines, but shorter
