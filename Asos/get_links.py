@@ -19,9 +19,6 @@ class Shoe:
         self.sizes = size_list
         self.link = link
 
-    def add_all(self):
-        pass
-
 
 full_url = 'https://www.asos.com/men/outlet/shoes-trainers/cat/?cid=27437' \
            '&currentpricerange=0-210&nlid=mw|outlet|shop%20by%20product&refine=brand:'
@@ -82,6 +79,7 @@ inv_types = {
 }
 
 url_for_adidas = full_url + brands['Adidas'] + '&page=1'
+url_discount = 'https://www.asos.com/men/outlet/shoes-trainers/cat/?%20trainers&cid=27437&nlid=mw%7Coutlet%7Cshop%20by%20product%7Cshoes%20&page=5'
 
 headers = {
     "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
@@ -99,12 +97,14 @@ data_from_page = page.split('\n')
 names = tuple(data_from_page[::3])
 info = (data_from_page[1::3], data_from_page[2::3])
 adidas_trainers = []
+urls = []
 for i in range(len(names)):
     if i % 2 == 0:
         try:
             driver.find_element_by_xpath('//*[contains(text(), \"{}\")]'.format(names[i])).click()
             time.sleep(1)
-            driver.refresh()
+            # driver.refresh()
+            urls.append(driver.current_url)
             sz = driver.find_element_by_xpath('//*[@id="main-size-select-0"]').text
             data_from_page = sz.split('\n')
             shoe_sizes = []
@@ -118,7 +118,7 @@ for i in range(len(names)):
                                         size_list=shoe_sizes,
                                         link=driver.current_url))
             driver.back()
-            print(adidas_trainers[counter].__dict__)
+            # print(adidas_trainers[i].__dict__)
         except selenium.common.exceptions.NoSuchElementException:
             # driver.refresh()
             driver.get(url_for_adidas)
@@ -132,10 +132,10 @@ for i in range(len(names)):
 
 
 driver.quit()
-for shoe in adidas_trainers:
-    print(shoe.__dict__)
+# for shoe in adidas_trainers:
+#     print(shoe.__dict__)
 
-
+print(urls)
 def obj_dict(obj):
     return obj.__dict__
 
@@ -147,6 +147,9 @@ with open('shoes.json', 'w') as outfile:
 
 with open('shoes.txt', 'w') as outfile:
     json.dump(json_string, outfile)
+
+
+
 
 # Same 2 lines, but shorter
 # adidas_trainers.append(Shoe(names[i], info[0][i], [int(info[1][i]) for info[1][i]
